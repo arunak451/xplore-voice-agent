@@ -132,7 +132,7 @@ The microphone requires **HTTPS** on the live site (localhost is fine for testin
 | `ORG_NAME`, `ASSISTANT_NAME` | Xplore Hospital, Priya | Used in the greeting and persona |
 | `SUPPORT_PHONE`, `EMERGENCY_PHONE` | — | Given when an answer isn't on the site, or for emergencies |
 | `GROQ_API_KEY` | — | Enables conversational answers through Groq. When set, Groq is used instead of Claude |
-| `GROQ_MODEL` | `llama-3.3-70b-versatile` | Any chat model ID listed at console.groq.com/docs/models |
+| `GROQ_MODEL` | `openai/gpt-oss-120b` | Any chat model ID listed at console.groq.com/docs/models |
 | `ANTHROPIC_API_KEY` | — | Enables conversational answers through Claude |
 | `CLAUDE_MODEL` | `claude-opus-5-5` | `claude-haiku-5-5` is faster and much cheaper for high traffic |
 | `CLAUDE_EFFORT` | `low` | `low` gives the fastest replies |

@@ -19,7 +19,7 @@ export const config = {
   claudeEffort: env('CLAUDE_EFFORT', 'low'),
   groqApiKey: env('GROQ_API_KEY'),
   groqApiBase: env('GROQ_API_BASE', 'https://api.groq.com/openai/v1'),
-  groqModel: env('GROQ_MODEL', 'llama-3.3-70b-versatile'),
+  groqModel: env('GROQ_MODEL', 'openai/gpt-oss-120b'),
   // Which LLM answers: Groq if its key is set, else Claude, else none (extractive mode).
   llmProvider: env('GROQ_API_KEY') ? 'groq' : (env('ANTHROPIC_API_KEY') || env('ANTHROPIC_AUTH_TOKEN')) ? 'claude' : '',
 
