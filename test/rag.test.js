@@ -35,3 +35,14 @@ test('sentence splitter keeps "Dr." and prices intact and ships the first senten
   assert.ok(out.some((x) => x.includes('Dr. Ramesh Kumar is available')));
   assert.equal(out.join(' '), 'Sure! Dr. Ramesh Kumar is available on Monday, Wednesday and Friday. The fee is ₹800. Would you like to know how to book?');
 });
+
+test('follow-up questions use the previous turn ("his fee", "yes please")', async () => {
+  const { retrieve } = await import('../server/index.js');
+  const h = [
+    { role: 'user', content: 'When is the cardiologist available?' },
+    { role: 'assistant', content: 'Dr. Ramesh Kumar sees patients Monday, Wednesday and Friday, 10 AM to 2 PM. Would you like to know how to book an appointment?' },
+  ];
+  assert.match(retrieve('what about his fee?', h)[0].title, /Cardiology/);
+  assert.match(retrieve('yes please', h)[0].title, /book an appointment/i);
+  assert.match(retrieve('Do you accept Star Health insurance?', h)[0].title, /Insurance/);
+});

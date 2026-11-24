@@ -74,14 +74,7 @@ app.post('/api/chat', express.json({ limit: '32kb' }), rateLimit(30, 60_000), as
   const abort = new AbortController();
   res.on('close', () => abort.abort());
 
-  // Search with the last user turn too, so follow-ups like "what about Sunday?" still find context.
-  const lastUser = [...history].reverse().find((m) => m.role === 'user')?.content || '';
-  let passages = kb.search(question, { k: 4 });
-  if (passages.length < 2 && lastUser) {
-    const extra = kb.search(`${lastUser} ${question}`, { k: 3 });
-    for (const p of extra) if (!passages.some((x) => x.text === p.text)) passages.push(p);
-    passages = passages.slice(0, 4);
-  }
+  const passages = retrieve(question, history);
   send('sources', passages.map(({ title, source }) => ({ title, source })));
 
   const splitter = new SentenceSplitter((s) => send('sentence', { text: s }));
@@ -145,6 +138,35 @@ app.post('/api/admin/reindex', (req, res) => {
 });
 
 app.use(express.static(path.join(ROOT, 'public'), { maxAge: '1h' }));
+
+// Words that signal the question leans on the previous turn ("what about HIS fee?", "yes please", "சரி").
+const FOLLOW_UP = /\b(he|she|him|his|her|they|them|their|it|its|that|this|those|there|same|also|more|else|another|other|yes|yeah|yep|ok|okay|sure|please|and|what about|how about)\b|சரி|ஆமா|ஆம்|அவர்|அவருடைய|அது|அதே|இன்னும்|மேலும்/i;
+
+/**
+ * Conversation-aware retrieval. Follow-ups like "what about his fee?" or "yes" (answering
+ * "Shall I tell you how to book?") make no sense alone, so we also search with the previous turn.
+ */
+export function retrieve(question, history = [], k = 5) {
+  const prev = [...history].reverse();
+  const lastUser = prev.find((m) => m.role === 'user')?.content || '';
+  const lastBot = prev.find((m) => m.role === 'assistant')?.content || '';
+  const own = kb.search(question, { k: 4 });
+  if (!lastUser && !lastBot) return own;
+
+  const isFollowUp = FOLLOW_UP.test(question) || question.split(/\s+/).length <= 4;
+  if (!isFollowUp && own.length >= 2) return own;
+
+  // The assistant's last reply comes first: it holds the offer a "yes" accepts, and the subject a "his" refers to.
+  const ctx = kb.search(`${lastBot} ${lastUser} ${question}`, { k: 3 });
+  // "Yes" accepts the offer in the bot's last sentence ("Would you like to know how to book?").
+  const accepts = /^(yes|yeah|yep|ok|okay|sure|please|go ahead|tell me|சரி|ஆமா|ஆம்)\b/i.test(question.trim());
+  const lastSentence = lastBot.split(/(?<=[.!?।])\s+/).filter(Boolean).pop() || '';
+  const offer = accepts && /\?\s*$/.test(lastSentence) ? kb.search(lastSentence, { k: 2 }) : [];
+  const merged = isFollowUp ? [...offer, ...ctx, ...own] : [...own, ...ctx];
+  const out = [];
+  for (const p of merged) if (!out.some((x) => x.text === p.text)) out.push(p);
+  return out.slice(0, k);
+}
 
 /** Turns a token stream into natural sentences for TTS, without breaking "Dr. Ramesh" or "₹1,499". */
 export class SentenceSplitter {

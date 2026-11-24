@@ -16,6 +16,11 @@ HOW YOU SPEAK
 - If several items match, mention the two or three most relevant and offer to share more.
 - End with a short, helpful follow-up only when it is natural (e.g. offer to explain how to book).
 
+HOLDING A CONVERSATION
+- This is an ongoing conversation. Read the earlier turns to understand follow-ups: "his fee" means the doctor you just mentioned, "what about Sunday?" continues the last topic, and "yes" or "sure" accepts the offer you just made, so give that information.
+- Greetings, thanks, "okay", "bye" and other small talk need no website facts: reply naturally in a few words (e.g. "You're welcome! Anything else I can help with?"). Never answer small talk with "I don't have that information".
+- If the visitor's words are unclear or cut off (speech recognition can mishear), ask a short clarifying question instead of guessing.
+
 STRICT GROUNDING RULES (most important)
 - Answer ONLY using facts inside <website_content>. Never use outside knowledge, never guess, never invent doctors, timings, prices, insurers or phone numbers.
 - If the answer is not in <website_content>, say kindly that you don't have that information and suggest calling the front desk at ${config.supportPhone}.
@@ -31,7 +36,7 @@ STRICT GROUNDING RULES (most important)
  * @param {AbortSignal} signal
  */
 export async function streamAnswer({ question, lang, history, passages }, onText, signal) {
-  if (!client) return extractiveAnswer({ lang, passages }, onText);
+  if (!client) return extractiveAnswer({ question, lang, passages }, onText);
 
   const context = passages.length
     ? passages.map((p, i) => `[${i + 1}] ${p.title}\n${p.text}`).join('\n\n')
@@ -80,9 +85,18 @@ export async function streamAnswer({ question, lang, history, passages }, onText
 }
 
 /** No-LLM fallback: speak the best matching passage verbatim (cannot hallucinate). */
-function extractiveAnswer({ lang, passages }, onText) {
+const SMALL_TALK = [
+  { re: /^(hi|hello|hey|good (morning|afternoon|evening)|வணக்கம்)\b/i, en: 'Hello! How can I help you today?', ta: 'வணக்கம்! நான் உங்களுக்கு எப்படி உதவலாம்?' },
+  { re: /\b(thanks|thank you|thx|நன்றி)\b/i, en: "You're welcome! Anything else I can help with?", ta: 'பரவாயில்லை! வேறு ஏதாவது உதவி வேண்டுமா?' },
+  { re: /^(bye|goodbye|that'?s all|no thanks?)\b/i, en: 'Take care! Have a good day.', ta: 'நன்றி, நல்ல நாளாக அமையட்டும்!' },
+];
+
+function extractiveAnswer({ question = '', lang, passages }, onText) {
   let text;
-  if (!passages.length) {
+  const talk = SMALL_TALK.find((s) => s.re.test(question.trim()));
+  if (talk && question.trim().split(/\s+/).length <= 5) {
+    text = lang === 'ta' ? talk.ta : talk.en;
+  } else if (!passages.length) {
     text = lang === 'ta'
       ? `மன்னிக்கவும், அந்த தகவல் என்னிடம் இல்லை. தயவுசெய்து ${config.supportPhone} என்ற எண்ணில் எங்கள் முன்பணியாளரை அழைக்கவும்.`
       : `Sorry, I don't have that information. Please call our front desk at ${config.supportPhone}, and they'll be happy to help.`;

@@ -300,6 +300,7 @@
   let state = 'idle';
   let history = [];
   let chatCtrl = null;
+  let silentRetry = false; // one extra listen after silence in hands-free mode
   let handsFree = false; // after a voice question, listen again automatically when the reply ends
   let greeted = false;
   let streamDone = true;
@@ -471,11 +472,14 @@
     live.textContent = '';
     if (state !== 'listening' && state !== 'thinking') return; // cancelled
     if (!text) {
+      // A pause to think shouldn't end a hands-free conversation: listen once more before stopping.
+      if (auto && handsFree && !silentRetry && root.classList.contains('open')) { silentRetry = true; startListening(true); return; }
       handsFree = false;
       setState('idle');
       if (!auto) statusEl.textContent = t('notHeard');
       return;
     }
+    silentRetry = false;
     ask(text, true);
   }
 
