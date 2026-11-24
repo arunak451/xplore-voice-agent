@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Xplore Hospital — Demo</title>
+  <meta name="description" content="Demo website with the Xplore voice receptionist embedded.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root { --c1: #0ea5a4; --c2: #6366f1; --ink: #0f172a; --muted: #475569; --bg: #f8fafc; --card: #fff; --line: #e2e8f0; }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) { --ink: #e2e8f0; --muted: #94a3b8; --bg: #0b1220; --card: #111a2e; --line: #1e293b; }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Inter, "Noto Sans Tamil", system-ui, sans-serif; color: var(--ink); background: var(--bg); line-height: 1.6; }
+    a { color: inherit; }
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+    nav { display: flex; align-items: center; justify-content: space-between; padding: 18px 0; gap: 16px; }
+    .logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 20px; letter-spacing: -.02em; }
+    .logo i { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg, var(--c1), var(--c2)); display: grid; place-items: center; color: #fff; font-style: normal; }
+    .links { display: flex; gap: 24px; font-size: 14.5px; color: var(--muted); }
+    .links a { text-decoration: none; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: 999px; font-weight: 600; font-size: 15px; text-decoration: none; border: 0; cursor: pointer; font-family: inherit; }
+    .btn.primary { color: #fff; background: linear-gradient(135deg, var(--c1), var(--c2)); box-shadow: 0 10px 24px -10px var(--c2); }
+    .btn.ghost { border: 1px solid var(--line); background: var(--card); color: var(--ink); }
+    .hero { display: grid; grid-template-columns: 1.15fr .85fr; gap: 48px; align-items: center; padding: 48px 0 72px; }
+    .pill { display: inline-flex; gap: 8px; align-items: center; font-size: 13px; font-weight: 600; color: var(--c1); background: color-mix(in srgb, var(--c1) 12%, transparent); padding: 6px 12px; border-radius: 999px; }
+    h1 { font-size: clamp(34px, 5vw, 54px); line-height: 1.08; letter-spacing: -.035em; margin: 18px 0 16px; }
+    h1 span { background: linear-gradient(135deg, var(--c1), var(--c2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .lead { font-size: 18px; color: var(--muted); max-width: 540px; }
+    .cta { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
+    .try { background: var(--card); border: 1px solid var(--line); border-radius: 24px; padding: 24px; box-shadow: 0 30px 60px -30px rgba(15,23,42,.35); }
+    .try h3 { margin: 0 0 4px; font-size: 17px; }
+    .try p { margin: 0 0 16px; color: var(--muted); font-size: 14px; }
+    .q { display: block; width: 100%; text-align: left; font: inherit; font-size: 14.5px; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 14px; padding: 11px 14px; margin-bottom: 8px; cursor: pointer; transition: .2s; }
+    .q:hover { border-color: var(--c1); transform: translateX(3px); }
+    .q::before { content: "🎙️  "; }
+    section h2 { font-size: 30px; letter-spacing: -.02em; margin: 0 0 8px; }
+    section > .wrap > p { color: var(--muted); margin: 0 0 28px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 20px; }
+    .card b { display: block; margin: 8px 0 2px; }
+    .card small { color: var(--muted); }
+    .card .e { font-size: 26px; }
+    .band { padding: 64px 0; }
+    .band.alt { background: var(--card); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    footer { padding: 32px 0 120px; color: var(--muted); font-size: 14px; }
+    .note { font-size: 12.5px; color: var(--muted); margin-top: 14px; }
+    @media (max-width: 820px) {
+      .hero { grid-template-columns: 1fr; padding-top: 24px; }
+      .links { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="wrap">
+    <nav>
+      <div class="logo"><i>✚</i> Xplore Hospital</div>
+      <div class="links"><a href="#departments">Departments</a><a href="#doctors">Doctors</a><a href="#insurance">Insurance</a><a href="#contact">Contact</a></div>
+      <a class="btn ghost" href="tel:+914440001234">📞 +91 44 4000 1234</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="wrap hero">
+      <div>
+        <span class="pill">● New · Talk to our virtual receptionist</span>
+        <h1>Questions? Just <span>ask out loud.</span></h1>
+        <p class="lead">Doctor timings, insurance, appointments, directions — our voice assistant answers instantly in English or Tamil, any time of the day. No waiting on hold.</p>
+        <div class="cta">
+          <button class="btn primary" onclick="XploreVoiceAgent.open()">🎙️ Talk to Priya</button>
+          <a class="btn ghost" href="#departments">Explore departments</a>
+        </div>
+      </div>
+      <div class="try">
+        <h3>Try asking…</h3>
+        <p>Tap a question, or open the assistant and speak.</p>
+        <button class="q">When is the cardiologist available?</button>
+        <button class="q">Do you accept Star Health insurance?</button>
+        <button class="q">How do I book an appointment?</button>
+        <button class="q">Is the OPD open on Sunday?</button>
+        <button class="q">இதய மருத்துவர் எப்போது கிடைப்பார்?</button>
+        <p class="note">Demo site with sample data. The assistant only answers from this website's content.</p>
+      </div>
+    </div>
+
+    <section class="band alt" id="departments">
+      <div class="wrap">
+        <h2>Departments</h2>
+        <p>Multispeciality care under one roof, with a 24×7 emergency department.</p>
+        <div class="grid">
+          <div class="card"><span class="e">❤️</span><b>Cardiology</b><small>Heart care, cath lab, echo, TMT</small></div>
+          <div class="card"><span class="e">🦴</span><b>Orthopaedics</b><small>Joint replacement, sports injuries</small></div>
+          <div class="card"><span class="e">🧸</span><b>Paediatrics</b><small>Child care and neonatology</small></div>
+          <div class="card"><span class="e">🤰</span><b>Obstetrics &amp; Gynaecology</b><small>Pregnancy and women's health</small></div>
+          <div class="card"><span class="e">🧠</span><b>Neurology</b><small>Stroke team, epilepsy, headaches</small></div>
+          <div class="card"><span class="e">🚑</span><b>Emergency 24×7</b><small>Ambulance: +91 44 4000 1108</small></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band" id="insurance">
+      <div class="wrap">
+        <h2>Cashless insurance</h2>
+        <p>Star Health, HDFC ERGO, ICICI Lombard, Niva Bupa, Care Health, Bajaj Allianz, New India Assurance, CGHS, CMCHIS and more.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap" id="contact">
+    No. 42, Anna Salai, Teynampet, Chennai 600018 · Front desk +91 44 4000 1234 · Emergency +91 44 4000 1108<br>
+    Demo page for the Xplore voice agent, with sample data.
+  </footer>
+
+  <!-- ▼ This one line is all your real website needs ▼ -->
+  <script src="/widget.js" defer data-lang="en" data-color="#0ea5a4" data-color2="#6366f1"></script>
+  <script>
+    document.querySelectorAll('.q').forEach((b) => b.addEventListener('click', () => window.XploreVoiceAgent?.ask(b.textContent)));
+  </script>
+</body>
+</html>

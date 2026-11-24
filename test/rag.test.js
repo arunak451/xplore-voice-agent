@@ -1,0 +1,37 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { KnowledgeBase, tokenize } from '../server/rag.js';
+import { SentenceSplitter } from '../server/index.js';
+
+const kb = new KnowledgeBase();
+const top = (q) => kb.search(q)[0]?.title;
+
+test('finds the right section for common visitor questions', () => {
+  assert.equal(top('What are the cardiologist timings?'), 'Doctors — Cardiology (heart specialists)');
+  assert.equal(top('Do you accept Star Health insurance?'), 'Insurance and cashless treatment');
+  assert.equal(top('how do I book an appointment'), 'How to book an appointment');
+  assert.equal(top('Is the hospital open on Sunday?'), 'Hospital timings and OPD hours');
+  assert.equal(top('where are you located'), 'Address, location and directions');
+  assert.equal(top('how much is the heart check package'), 'Health check-up packages');
+});
+
+test('Tamil questions reach English content through the glossary', () => {
+  assert.ok(tokenize('காப்பீடு').includes('insurance'));
+  assert.match(top('காப்பீடு ஏற்றுக்கொள்கிறீர்களா?'), /Insurance/);
+  assert.ok(kb.search('இதய மருத்துவர் நேரம்').some((r) => r.title === 'Doctors — Cardiology (heart specialists)'));
+});
+
+test('off-topic questions return nothing (prevents made-up answers)', () => {
+  assert.deepEqual(kb.search('what is the capital of France'), []);
+  assert.deepEqual(kb.search('do you have a swimming pool'), []);
+});
+
+test('sentence splitter keeps "Dr." and prices intact and ships the first sentence early', () => {
+  const out = [];
+  const s = new SentenceSplitter((x) => out.push(x));
+  for (const tok of 'Sure! Dr. Ramesh Kumar is available on Monday, Wednesday and Friday. The fee is ₹800. Would you like to know how to book?'.split(/(?<= )/)) s.push(tok);
+  s.flush();
+  assert.equal(out[0], 'Sure!');
+  assert.ok(out.some((x) => x.includes('Dr. Ramesh Kumar is available')));
+  assert.equal(out.join(' '), 'Sure! Dr. Ramesh Kumar is available on Monday, Wednesday and Friday. The fee is ₹800. Would you like to know how to book?');
+});
