@@ -2,7 +2,8 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { config } from './config.js';
 
-const client = config.hasLLM ? new Anthropic() : null;
+// Groq wins when its key is set; otherwise Claude; otherwise extractive mode.
+const client = config.llmProvider === 'claude' ? new Anthropic() : null;
 
 const LANG_NAME = { en: 'English', ta: 'Tamil' };
 
@@ -36,7 +37,7 @@ STRICT GROUNDING RULES (most important)
  * @param {AbortSignal} signal
  */
 export async function streamAnswer({ question, lang, history, passages }, onText, signal) {
-  if (!client) return extractiveAnswer({ question, lang, passages }, onText);
+  if (!config.llmProvider) return extractiveAnswer({ question, lang, passages }, onText);
 
   const context = passages.length
     ? passages.map((p, i) => `[${i + 1}] ${p.title}\n${p.text}`).join('\n\n')
@@ -51,6 +52,8 @@ export async function streamAnswer({ question, lang, history, passages }, onText
   ];
   // The API requires the first message to be from the user.
   while (messages.length && messages[0].role !== 'user') messages.shift();
+
+  if (config.llmProvider === 'groq') return streamGroq(messages, onText, signal);
 
   const stream = client.beta.messages.stream(
     {
@@ -80,6 +83,43 @@ export async function streamAnswer({ question, lang, history, passages }, onText
       : `I'm sorry, I can't help with that. Please call our front desk at ${config.supportPhone}.`;
     onText(msg);
     text = msg;
+  }
+  return { text, mode: 'llm' };
+}
+
+/** Groq: OpenAI-compatible chat completions, streamed as Server-Sent Events. */
+async function streamGroq(messages, onText, signal) {
+  const res = await fetch(`${config.groqApiBase}/chat/completions`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${config.groqApiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: config.groqModel,
+      messages: [{ role: 'system', content: SYSTEM }, ...messages],
+      stream: true,
+      temperature: 0.3,
+      max_tokens: 400,
+    }),
+    signal,
+  });
+  if (!res.ok) {
+    const err = new Error(`Groq ${res.status}: ${(await res.text()).slice(0, 300)}`);
+    err.status = res.status;
+    throw err;
+  }
+  let text = '', buf = '';
+  const dec = new TextDecoder();
+  for await (const chunk of res.body) {
+    buf += dec.decode(chunk, { stream: true });
+    let i;
+    while ((i = buf.indexOf('\n')) >= 0) {
+      const line = buf.slice(0, i).trim(); buf = buf.slice(i + 1);
+      if (!line.startsWith('data:')) continue;
+      const data = line.slice(5).trim();
+      if (data === '[DONE]') return { text, mode: 'llm' };
+      let delta;
+      try { delta = JSON.parse(data).choices?.[0]?.delta?.content; } catch { continue; }
+      if (delta) { text += delta; onText(delta); }
+    }
   }
   return { text, mode: 'llm' };
 }

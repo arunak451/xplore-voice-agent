@@ -197,7 +197,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === path.join(ROOT, 'server
     console.log(`\n  🎙️  ${config.assistantName} voice agent for ${config.orgName}`);
     console.log(`  → Demo:        http://localhost:${config.port}`);
     console.log(`  → Knowledge:   ${kb.docs.length} chunks`);
-    console.log(`  → Answers:     ${config.hasLLM ? `Claude (${config.claudeModel}, effort ${config.claudeEffort})` : 'extractive mode (set ANTHROPIC_API_KEY for conversational answers)'}`);
+    console.log(`  → Answers:     ${config.llmProvider === 'groq' ? `Groq (${config.groqModel})` : config.llmProvider === 'claude' ? `Claude (${config.claudeModel}, effort ${config.claudeEffort})` : 'extractive mode (set GROQ_API_KEY or ANTHROPIC_API_KEY for conversational answers)'}`);
     console.log(`  → Voice:       ${fishEnabled() ? `Fish Audio (${config.fishTtsModel})` : 'browser voice (set FISH_API_KEY for natural voice)'}\n`);
   });
 }

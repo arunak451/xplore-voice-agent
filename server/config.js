@@ -17,7 +17,11 @@ export const config = {
 
   claudeModel: env('CLAUDE_MODEL', 'claude-opus-5-5'),
   claudeEffort: env('CLAUDE_EFFORT', 'low'),
-  hasLLM: Boolean(env('ANTHROPIC_API_KEY') || env('ANTHROPIC_AUTH_TOKEN')),
+  groqApiKey: env('GROQ_API_KEY'),
+  groqApiBase: env('GROQ_API_BASE', 'https://api.groq.com/openai/v1'),
+  groqModel: env('GROQ_MODEL', 'llama-3.3-70b-versatile'),
+  // Which LLM answers: Groq if its key is set, else Claude, else none (extractive mode).
+  llmProvider: env('GROQ_API_KEY') ? 'groq' : (env('ANTHROPIC_API_KEY') || env('ANTHROPIC_AUTH_TOKEN')) ? 'claude' : '',
 
   fishApiKey: env('FISH_API_KEY'),
   fishApiBase: env('FISH_API_BASE', 'https://api.fish.audio'),
@@ -28,3 +32,4 @@ export const config = {
   knowledgeDir: path.join(ROOT, 'knowledge'),
   crawledFile: path.join(ROOT, 'data', 'crawled.json'),
 };
+config.hasLLM = Boolean(config.llmProvider);

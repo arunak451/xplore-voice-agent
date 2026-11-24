@@ -48,7 +48,8 @@ npm install
 cp .env.example .env
 ```
 
-Edit `.env` and set `FISH_API_KEY` and `ANTHROPIC_API_KEY`, then start the server:
+Edit `.env` and set an LLM key, either `GROQ_API_KEY` (free tier at console.groq.com) or `ANTHROPIC_API_KEY`,
+plus `FISH_API_KEY` if you have one. Then start the server:
 
 ```bash
 npm start
@@ -56,7 +57,7 @@ npm start
 
 Open **http://localhost:3000** to see a demo hospital site with the assistant embedded.
 
-> **Without `ANTHROPIC_API_KEY`** the agent still works in *extractive mode*: it reads out the best matching
+> **Without `GROQ_API_KEY` or `ANTHROPIC_API_KEY`** the agent still works in *extractive mode*: it reads out the best matching
 > passage word for word. That can't hallucinate, but it sounds less conversational.
 > **Without `FISH_API_KEY`** it uses the browser's built-in voice.
 
@@ -130,7 +131,9 @@ The microphone requires **HTTPS** on the live site (localhost is fine for testin
 |---|---|---|
 | `ORG_NAME`, `ASSISTANT_NAME` | Xplore Hospital, Priya | Used in the greeting and persona |
 | `SUPPORT_PHONE`, `EMERGENCY_PHONE` | — | Given when an answer isn't on the site, or for emergencies |
-| `ANTHROPIC_API_KEY` | — | Enables conversational answers |
+| `GROQ_API_KEY` | — | Enables conversational answers through Groq. When set, Groq is used instead of Claude |
+| `GROQ_MODEL` | `llama-3.3-70b-versatile` | Any chat model ID listed at console.groq.com/docs/models |
+| `ANTHROPIC_API_KEY` | — | Enables conversational answers through Claude |
 | `CLAUDE_MODEL` | `claude-opus-5-5` | `claude-haiku-5-5` is faster and much cheaper for high traffic |
 | `CLAUDE_EFFORT` | `low` | `low` gives the fastest replies |
 | `FISH_API_KEY` | — | Natural voice and the STT fallback |
