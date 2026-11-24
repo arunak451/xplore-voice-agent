@@ -159,7 +159,11 @@ All `/api` routes are rate-limited per IP to protect your API credits.
 
 ## Deploying
 
-Any Node host works (Render, Railway, Fly.io, a VPS or EC2 with PM2, etc.):
+**Vercel:** import this GitHub repository at vercel.com/new (no build settings needed, `vercel.json` has them),
+add `GROQ_API_KEY` (or `ANTHROPIC_API_KEY`) under *Environment Variables*, and deploy. The widget is then at
+`https://YOUR-PROJECT.vercel.app/widget.js`.
+
+Any other Node host works too (Render, Railway, Fly.io, a VPS or EC2 with PM2, etc.):
 
 ```bash
 npm ci --omit=dev
